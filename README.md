@@ -1,1 +1,1 @@
-# movies-explorer-api
+# Backend для дипломного проекта Movies explorer
