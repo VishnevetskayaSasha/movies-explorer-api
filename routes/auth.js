@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const auth = require('../middlewares/auth');
 const { login, createUser, logout } = require('../controllers/user');
 const {
   validatySigUp,
@@ -7,6 +8,6 @@ const {
 
 router.post('/signin', validatySigIn, login);
 router.post('/signup', validatySigUp, createUser);
-router.get('/logout', logout);
+router.get('/logout', auth, logout);
 
 module.exports = router;

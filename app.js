@@ -6,12 +6,11 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const router = require('./routes/index');
-const auth = require('./middlewares/auth');
 const { errorsHandler } = require('./middlewares/errorsHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
+const limiter = require('./middlewares/rateLimiter');
 
 const { PORT = 3000 } = process.env;
-
 const app = express();
 
 // подключаемся к серверу mongo
@@ -22,6 +21,7 @@ mongoose.connect('mongodb://localhost:27017/moviesdb', {
   autoIndex: true, // make this also true
 });
 
+// cors
 const whitelist = [
   'https://localhost:3001',
   'http://localhost:3001',
@@ -46,20 +46,17 @@ app.use(cors(CORS_CONFIG));
 app.use(bodyParser.json()); // для собирания JSON-формата
 app.use(bodyParser.urlencoded({ extended: true })); // для приёма веб-страниц внутри POST-запроса
 app.use(cookieParser()); // подключаем парсер кук как мидлвэр
-
 app.use(requestLogger); // подключаем логгер запросов
-
 app.use(express.json());
-app.use(require('./routes/auth'));
 
-app.use('/', router);
+app.use(limiter);
+app.use(router);
+
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
   }, 0);
 });
-app.use(auth);
-app.use(router);
 
 app.use(errorLogger); // подключаем логгер ошибок
 app.use(errors());
