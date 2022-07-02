@@ -7,12 +7,15 @@ const auth = require('../middlewares/auth');
 const NotFound = require('../error/NotFound'); // 404
 
 // запускаем
-router.use('/users', auth, usersRouter);
-router.use('/movies', auth, moviesRouter);
 router.use('/', authRouter);
 
-router.use((req, res, next) => {
-  next(new NotFound(`По адресу ${req.path} ничего нет`));
+router.use(auth);
+
+router.use('/users', auth, usersRouter);
+router.use('/movies', auth, moviesRouter);
+
+router.use('*', auth, () => {
+  throw new NotFound('Необходимо авторизоваться');
 });
 
 module.exports = router;
